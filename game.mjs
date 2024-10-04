@@ -3,6 +3,7 @@ import {debug, DEBUG_LEVELS} from "./debug.mjs";
 import {ANSI} from "./ansi.mjs";
 import DICTIONARY from "./language.mjs";
 import showSplashScreen from "./splash.mjs";
+import {makeMenuItem, showTheMenu} from "./menu.mjs";
 
 const GAME_BOARD_SIZE = 3;
 const PLAYER_1 = 1;
@@ -142,6 +143,27 @@ function evaluateGameState(){
 
         sum = 0;
     }
+
+    for (let i = 0; i < GAME_BOARD_SIZE; i++){
+        sum += gameboard[i][i];
+    }
+
+    if (Math.abs(sum) == 3){
+        state = sum;
+    }
+
+    sum = 0;
+
+    for (let col = 0; col < GAME_BOARD_SIZE; col++){
+        let row = 2 - col;
+        sum += gameboard[row][col]; 
+    }
+
+    if (Math.abs(sum) == 3){
+        state = sum;
+    }
+
+    sum = 0;
 
     let winner = state / 3;
     return winner;
