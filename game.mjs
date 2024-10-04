@@ -88,8 +88,12 @@ async function playGame() {
         outcome = evaluateGameState();
         changeCurrentPlayer();
     } while (outcome == 0)
-    
-    showGameSummary(outcome);
+
+    if (outcome == 2){
+        showGameSummaryDraw();
+    } else {
+        showGameSummaryWin(outcome);
+    }
     
     return await askWantToPlayAgain();
 }
@@ -103,12 +107,19 @@ async function askWantToPlayAgain() {
     return playAgain;    
 }
 
-function showGameSummary(outcome){
+function showGameSummaryWin(outcome){
     clearScreen();
     let winningPlayer = (outcome > 0) ? 1:2;
     print("Winner is player " + winningPlayer);
     showGameBoardWithCurrentState();
     print("GAME OVER");
+}
+
+function showGameSummaryDraw(){
+    clearScreen();
+    print("Game is a draw");
+    showGameBoardWithCurrentState();
+    print("GAME OVER")
 }
 
 function changeCurrentPlayer(){
@@ -165,8 +176,27 @@ function evaluateGameState(){
 
     sum = 0;
 
+    if (checkForDraw() == true){
+        let draw = 2;
+        return draw;
+    }
+
     let winner = state / 3;
     return winner;
+}
+
+function checkForDraw(){
+    let draw = true;
+    for (let row = 0; row < GAME_BOARD_SIZE; row++){
+
+        for (let col = 0; col < GAME_BOARD_SIZE; col++){
+            if (gameboard[row][col] == 0){
+                draw = false;
+            }
+        }
+    }
+
+    return draw;
 }
 
 function updateGameBoardState(move){
@@ -186,18 +216,23 @@ async function getGameMoveFromCurrentPlayer() {
 }
 
 function isValidPositionOnBoard(position){
+    const ROW_ID = 0;
+    const COLUMN_ID = 1;
+    const lowestValidOption = 0;
 
     if (position.length < 2){
         return false;
     }
 
     let isValidInput = true;
-    if (position [0] * 1 != position[0] && position[1] * 1 != position[1]){
-        inputWasCorrect = false;
-    } else if (position[0] > GAME_BOARD_SIZE && position[1] > GAME_BOARD_SIZE){
-        inputWasCorrect = false;
-    } else if (Number.parseInt(position[0]) != position[0] && Number.parseInt(position[1]) != position[1]){
-        inputWasCorrect = false;
+    if (position[COLUMN_ID] * 1 != position[COLUMN_ID] && position[ROW_ID] * 1 != position[ROW_ID]){
+        isValidInput = false;
+    } else if (position[COLUMN_ID] > GAME_BOARD_SIZE || position[ROW_ID] > GAME_BOARD_SIZE){
+        isValidInput = false;
+    } else if (position[COLUMN_ID] < lowestValidOption || position[ROW_ID] < lowestValidOption){
+        isValidInput = false;
+    } else if (gameboard[position[ROW_ID]][position[COLUMN_ID]] != 0){
+        isValidInput = false;
     }
 
     return isValidInput;
