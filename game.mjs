@@ -8,6 +8,7 @@ import {makeMenuItem, showTheMenu} from "./menu.mjs";
 const GAME_BOARD_SIZE = 3;
 const PLAYER_1 = 1;
 const PLAYER_2 = -1;
+const player_2 = 2;
 const gameOngoing = 0;
 const outcomeDraw = 2;
 const splashWaitTime = 2500;
@@ -118,17 +119,21 @@ async function askWantToPlayAgain() {
 
 function showGameSummaryWin(outcome){
     clearScreen();
-    let winningPlayer = (outcome > positiveNumberTest) ? 1:2;
-    print("Winner is player " + winningPlayer);
+    let winningPlayer = (outcome > positiveNumberTest) ? PLAYER_1:player_2;
+    let playerDescription = language.PLAYER_1;
+    if (winningPlayer == player_2){
+        playerDescription = language.PLAYER_2;
+    }
+    print(language.WINNER + playerDescription);
     showGameBoardWithCurrentState();
-    print("GAME OVER");
+    print(language.GAME_OVER);
 }
 
 function showGameSummaryDraw(){
     clearScreen();
-    print("Game is a draw");
+    print(language.OUTCOME_DRAW);
     showGameBoardWithCurrentState();
-    print("GAME OVER")
+    print(language.GAME_OVER)
 }
 
 function changeCurrentPlayer(){
@@ -216,7 +221,7 @@ function updateGameBoardState(move){
 async function getGameMoveFromCurrentPlayer() {
     let position = null;
     do {
-        let rawInput = await askQuestion("Place your mark at: ");
+        let rawInput = await askQuestion(language.PLAYER_PROMPT);
         position = rawInput.split(" ");
     } while (isValidPositionOnBoard(position) == false)
     
@@ -247,11 +252,11 @@ function isValidPositionOnBoard(position){
 }
 
 function showHUD(){
-    let playerDescription = "one";
+    let playerDescription = language.PLAYER_1;
     if (PLAYER_2 == currentPlayer){
-        playerDescription = "two";
+        playerDescription = language.PLAYER_2;
     }
-    print("Player " + playerDescription + " it is your turn");
+    print(language.PLAYER + playerDescription + language.YOUR_TURN);
 }
 
 function showGameBoardWithCurrentState(){
