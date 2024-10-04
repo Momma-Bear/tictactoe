@@ -8,6 +8,15 @@ import {makeMenuItem, showTheMenu} from "./menu.mjs";
 const GAME_BOARD_SIZE = 3;
 const PLAYER_1 = 1;
 const PLAYER_2 = -1;
+const gameOngoing = 0;
+const outcomeDraw = 2;
+const splashWaitTime = 2500;
+const emptyCell = 0;
+const notValidChoice = -1;
+const lowestValidInputLength = 2;
+const numberTest = 1;
+const positiveNumberTest = 0;
+const swapPlayer = -1;
 
 const MENU_CHOICES = {
     MENU_CHOICE_START_GAME: 1,
@@ -23,7 +32,7 @@ let currentPlayer;
 
 clearScreen();
 showSplashScreen();
-setTimeout(start, 2500);
+setTimeout(start, splashWaitTime);
 
 async function start() {
     
@@ -56,7 +65,7 @@ async function runGame() {
 
 async function showMenu() {
     
-    let choice = -1;
+    let choice = notValidChoice;
     let validChoice = false;
 
     while (!validChoice){
@@ -87,9 +96,9 @@ async function playGame() {
         updateGameBoardState(move);
         outcome = evaluateGameState();
         changeCurrentPlayer();
-    } while (outcome == 0)
+    } while (outcome == gameOngoing)
 
-    if (outcome == 2){
+    if (outcome == outcomeDraw){
         showGameSummaryDraw();
     } else {
         showGameSummaryWin(outcome);
@@ -109,7 +118,7 @@ async function askWantToPlayAgain() {
 
 function showGameSummaryWin(outcome){
     clearScreen();
-    let winningPlayer = (outcome > 0) ? 1:2;
+    let winningPlayer = (outcome > positiveNumberTest) ? 1:2;
     print("Winner is player " + winningPlayer);
     showGameBoardWithCurrentState();
     print("GAME OVER");
@@ -123,12 +132,12 @@ function showGameSummaryDraw(){
 }
 
 function changeCurrentPlayer(){
-    currentPlayer *= -1;
+    currentPlayer *= swapPlayer;
 }
 
 function evaluateGameState(){
-    let sum = 0;
-    let state = 0;
+    let sum = gameOngoing;
+    let state = gameOngoing;
 
     for (let row = 0; row < GAME_BOARD_SIZE; row ++){
 
@@ -136,10 +145,10 @@ function evaluateGameState(){
             sum += gameboard[row][col];
         }
 
-        if (Math.abs(sum) == 3){
+        if (Math.abs(sum) == GAME_BOARD_SIZE){
             state = sum;
         }
-        sum = 0;
+        sum = gameOngoing;
     }
 
     for (let col = 0; col < GAME_BOARD_SIZE; col++){
@@ -148,40 +157,39 @@ function evaluateGameState(){
             sum += gameboard[row][col];
         }
 
-        if (Math.abs(sum) == 3) {
+        if (Math.abs(sum) == GAME_BOARD_SIZE) {
             state = sum;
         }
 
-        sum = 0;
+        sum = gameOngoing;
     }
 
     for (let i = 0; i < GAME_BOARD_SIZE; i++){
         sum += gameboard[i][i];
     }
 
-    if (Math.abs(sum) == 3){
+    if (Math.abs(sum) == GAME_BOARD_SIZE){
         state = sum;
     }
 
-    sum = 0;
+    sum = gameOngoing;
 
     for (let col = 0; col < GAME_BOARD_SIZE; col++){
-        let row = 2 - col;
+        let row = GAME_BOARD_SIZE - 1 - col;
         sum += gameboard[row][col]; 
     }
 
-    if (Math.abs(sum) == 3){
+    if (Math.abs(sum) == GAME_BOARD_SIZE){
         state = sum;
     }
 
-    sum = 0;
+    sum = gameOngoing;
 
     if (checkForDraw() == true){
-        let draw = 2;
-        return draw;
+        return outcomeDraw;
     }
 
-    let winner = state / 3;
+    let winner = state / GAME_BOARD_SIZE;
     return winner;
 }
 
@@ -220,18 +228,18 @@ function isValidPositionOnBoard(position){
     const COLUMN_ID = 1;
     const lowestValidOption = 0;
 
-    if (position.length < 2){
+    if (position.length < lowestValidInputLength){
         return false;
     }
 
     let isValidInput = true;
-    if (position[COLUMN_ID] * 1 != position[COLUMN_ID] && position[ROW_ID] * 1 != position[ROW_ID]){
+    if (position[COLUMN_ID] * numberTest != position[COLUMN_ID] && position[ROW_ID] * numberTest != position[ROW_ID]){
         isValidInput = false;
     } else if (position[COLUMN_ID] > GAME_BOARD_SIZE || position[ROW_ID] > GAME_BOARD_SIZE){
         isValidInput = false;
     } else if (position[COLUMN_ID] < lowestValidOption || position[ROW_ID] < lowestValidOption){
         isValidInput = false;
-    } else if (gameboard[position[ROW_ID]][position[COLUMN_ID]] != 0){
+    } else if (gameboard[position[ROW_ID]][position[COLUMN_ID]] != emptyCell){
         isValidInput = false;
     }
 
@@ -251,9 +259,9 @@ function showGameBoardWithCurrentState(){
         let rowOutput = "";
         for (let currentCol = 0; currentCol < GAME_BOARD_SIZE; currentCol++){
             let cell = gameboard[currentRow][currentCol];
-            if (cell == 0) {
+            if (cell == emptyCell) {
                 rowOutput += "_ ";
-            } else if (cell > 0){
+            } else if (cell > positiveNumberTest){
                 rowOutput += "X ";
             } else {
                 rowOutput += "O ";
@@ -275,7 +283,7 @@ function createGameBoard(){
     for (let currentRow = 0; currentRow < GAME_BOARD_SIZE; currentRow++){
         let row = new Array(GAME_BOARD_SIZE);
         for (let currentCol = 0; currentCol < GAME_BOARD_SIZE; currentCol++){
-            row[currentCol] = 0;
+            row[currentCol] = emptyCell;
         }
         newBoard[currentRow] = row;
     }
