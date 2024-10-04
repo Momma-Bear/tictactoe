@@ -3,7 +3,6 @@ import {debug, DEBUG_LEVELS} from "./debug.mjs";
 import {ANSI} from "./ansi.mjs";
 import DICTIONARY from "./language.mjs";
 import showSplashScreen from "./splash.mjs";
-import {makeMenuItem, showTheMenu} from "./menu.mjs";
 
 const GAME_BOARD_SIZE = 3;
 const PLAYER_1 = 1;
@@ -12,78 +11,68 @@ const player_2 = 2;
 const gameOngoing = 0;
 const outcomeDraw = 2;
 const splashWaitTime = 2500;
+const creditsWaitTime = 2000;
+const exitGameWaitTime = 1500;
+const menuWaitTime = 250;
 const emptyCell = 0;
 const notValidChoice = -1;
 const lowestValidInputLength = 2;
 const numberTest = 1;
 const positiveNumberTest = 0;
 const swapPlayer = -1;
-
-const MENU_CHOICES = {
-    MENU_CHOICE_START_GAME: 1,
-    MENU_CHOICE_SHOW_SETTINGS: 2,
-    MENU_CHOICE_EXIT_GAME: 3
-};
-
-const NO_CHOICE = -1;
-
 let language = DICTIONARY.en;
+
+const MAIN_MENU = [
+    makeMenuItem(language.MENU_PVC, function () {startGame(1);}),
+    makeMenuItem(language.MENU_PVP, function () {startGame(2);}),
+    makeMenuItem(language.MENU_SETTINGS, showSettings),
+    makeMenuItem(language.MENU_CREDITS, showCredits),
+    makeMenuItem(language.MENU_QUIT, exitGame),
+];
+
+const SETTINGS_MENU = [
+    makeMenuItem(language.SETTINGS_LANGUAGE, showLanguageSettings),
+    makeMenuItem(language.MENU_BACK, showMainMenu),
+]
+
+const LANGUAGE_MENU = [
+    makeMenuItem("English", setLanguageToEnglish),
+    makeMenuItem("Norsk", setLanguageToNorsk),
+    makeMenuItem(language.MENU_BACK, showSettings),
+]
+
+let currentMenu = MAIN_MENU;
+
 let gameboard;
 let currentPlayer;
+let inSettings = true;
 
 clearScreen();
 showSplashScreen();
 setTimeout(start, splashWaitTime);
 
 async function start() {
-    
+
     do {
-
-        let chosenAction = NO_CHOICE;
-        chosenAction = await showMenu();
-
-        if (chosenAction == MENU_CHOICES.MENU_CHOICE_START_GAME){
-            await runGame();
-        } else if (chosenAction == MENU_CHOICES.MENU_CHOICE_SHOW_SETTINGS){
-            asdfd
-        } else if (chosenAction == MENU_CHOICES.MENU_CHOICE_EXIT_GAME){
-            clearScreen();
-            process.exit();
-        }
-    } while (true)
+    clearScreen();
+    print(ANSI.COLOR.YELLOW + "MENU" + ANSI.RESET);
+    showTheMenu(currentMenu);
+    let menuSelection = await getMenuSelection(currentMenu);
+    currentMenu[menuSelection].action();
+    } while (inSettings)
 
 }
 
-async function runGame() {
-    
+async function startGame() {
+    inSettings = false;
     let isPlaying = true;
 
     while (isPlaying){
         initilizeGame();
         isPlaying = await playGame();
     }
-}
-
-async function showMenu() {
-    
-    let choice = notValidChoice;
-    let validChoice = false;
-
-    while (!validChoice){
-        clearScreen();
-        print(ANSI.COLOR.YELLOW + "MENU" + ANSI.RESET);
-        print("1. Play Game");
-        print("2. Settings");
-        print("3. Exit Game");
-
-        choice = await askQuestion("");
-
-        if([MENU_CHOICES.MENU_CHOICE_START_GAME, MENU_CHOICES.MENU_CHOICE_SHOW_SETTINGS, MENU_CHOICES.MENU_CHOICE_EXIT_GAME].includes(Number(choice))){
-            validChoice = true;
-        }
-    }
-
-    return choice;
+    inSettings = true;
+    setTimeout(start, menuWaitTime);
 }
 
 async function playGame() {
@@ -278,6 +267,7 @@ function showGameBoardWithCurrentState(){
 }
 
 function initilizeGame(){
+    clearScreen();
     gameboard = createGameBoard();
     currentPlayer = PLAYER_1;
 }
@@ -299,3 +289,70 @@ function createGameBoard(){
 function clearScreen(){
     console.log(ANSI.CLEAR_SCREEN, ANSI.CURSOR_HOME, ANSI.RESET);
 }
+
+async function getMenuSelection(menu){
+    let choice = notValidChoice;
+    let validChoice = false;
+
+    while (!validChoice){
+    
+    choice = await askQuestion("");
+    
+        if(choice * numberTest == choice && choice <= menu.length){
+            validChoice = true;
+        }
+    }
+    return choice - 1;
+}
+
+function makeMenuItem(description, action){
+    return {description, action}
+}
+
+function showTheMenu(menu){
+    for (let i = 0; i < menu.length; i++){
+        console.log(i + 1 + ". " + menu[i].description);
+    }
+}
+
+function showSettings(){
+    currentMenu = SETTINGS_MENU;
+}
+
+function showMainMenu(){
+    currentMenu = MAIN_MENU;
+}
+
+function showLanguageSettings(){
+    currentMenu = LANGUAGE_MENU;
+}
+
+function showCredits(){
+    clearScreen();
+    print(language.CREDITS);
+    inSettings = false;
+    setTimeout(start, creditsWaitTime);
+}
+
+function exitGame(){
+    clearScreen();
+    print(language.EXIT);
+    inSettings = false;
+    setTimeout(quit, exitGameWaitTime);
+}
+
+function quit(){
+    process.exit();
+}
+
+function setLanguageToEnglish(){
+    language = DICTIONARY.en;
+    currentMenu = SETTINGS_MENU;
+
+}
+
+function setLanguageToNorsk(){
+    language = DICTIONARY.no;
+    currentMenu = SETTINGS_MENU;
+}
+
