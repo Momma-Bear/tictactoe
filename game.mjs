@@ -8,11 +8,12 @@ const GAME_BOARD_SIZE = 3;
 const PLAYER_1 = 1;
 const PLAYER_2 = -1;
 const player_2 = 2;
+const pvp = 2;
 const gameOngoing = 0;
 const outcomeDraw = 2;
 const splashWaitTime = 2500;
 const creditsWaitTime = 2000;
-const exitGameWaitTime = 1500;
+const exitGameWaitTime = 1000;
 const menuWaitTime = 250;
 const emptyCell = 0;
 const notValidChoice = -1;
@@ -63,26 +64,26 @@ async function start() {
 
 }
 
-async function startGame() {
+async function startGame(playerCount) {
     inSettings = false;
     let isPlaying = true;
 
     while (isPlaying){
         initilizeGame();
-        isPlaying = await playGame();
+        isPlaying = await playGame(playerCount);
     }
     inSettings = true;
     setTimeout(start, menuWaitTime);
 }
 
-async function playGame() {
+async function playGame(playerCount) {
 
     let outcome;
     do {
         clearScreen();
         showGameBoardWithCurrentState();
-        showHUD();
-        let move = await getGameMoveFromCurrentPlayer();
+        showHUD(playerCount);
+        let move = await getGameMoveFromCurrentPlayer(playerCount);
         updateGameBoardState(move);
         outcome = evaluateGameState();
         changeCurrentPlayer();
@@ -178,8 +179,7 @@ function evaluateGameState(){
     }
 
     sum = gameOngoing;
-
-    if (checkForDraw() == true){
+    if (state != GAME_BOARD_SIZE && checkForDraw() == true){
         return outcomeDraw;
     }
 
@@ -207,12 +207,25 @@ function updateGameBoardState(move){
     gameboard[move[ROW_ID]][move[COLUMN_ID]] = currentPlayer;
 }
 
-async function getGameMoveFromCurrentPlayer() {
+async function getGameMoveFromCurrentPlayer(playerCount) {
     let position = null;
-    do {
-        let rawInput = await askQuestion(language.PLAYER_PROMPT);
-        position = rawInput.split(" ");
-    } while (isValidPositionOnBoard(position) == false)
+    if (playerCount == 1){
+        if (currentPlayer == PLAYER_1){
+            do {
+                let rawInput = await askQuestion(language.PLAYER_PROMPT);
+                position = rawInput.split(" ");
+            } while (isValidPositionOnBoard(position) == false)
+        } else {
+            do {
+                position = [randomNumberGenerator(), randomNumberGenerator()];
+            } while (isValidPositionOnBoard(position) == false)
+        } 
+    } else if (playerCount = pvp){
+        do {
+            let rawInput = await askQuestion(language.PLAYER_PROMPT);
+            position = rawInput.split(" ");
+        } while (isValidPositionOnBoard(position) == false)
+    }
     
     return position;
 }
@@ -240,12 +253,21 @@ function isValidPositionOnBoard(position){
     return isValidInput;
 }
 
-function showHUD(){
+function showHUD(playerCount){
     let playerDescription = language.PLAYER_1;
-    if (PLAYER_2 == currentPlayer){
-        playerDescription = language.PLAYER_2;
+    if (playerCount == pvp){
+        if (PLAYER_2 == currentPlayer){
+            playerDescription = language.PLAYER_2;
+        }
+        print(language.PLAYER + playerDescription + language.YOUR_TURN);
+    } else {
+        if (PLAYER_2 == currentPlayer){
+            print(language.CPU);
+        } else {
+            print(language.PLAYER + playerDescription + language.YOUR_TURN);
+        }
     }
-    print(language.PLAYER + playerDescription + language.YOUR_TURN);
+
 }
 
 function showGameBoardWithCurrentState(){
@@ -356,3 +378,9 @@ function setLanguageToNorsk(){
     currentMenu = SETTINGS_MENU;
 }
 
+function randomNumberGenerator(){
+    let randomNumber = Math.random() * (GAME_BOARD_SIZE - 1);
+    let roundedNumber = Math.round(randomNumber);
+    
+    return (roundedNumber)
+}
