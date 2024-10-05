@@ -10,6 +10,7 @@ const PLAYER_1 = 1;
 const PLAYER_2 = -1;
 const player_2 = 2;
 const pvp = 2;
+const pvc = 1;
 const gameOngoing = 0;
 const outcomeDraw = 2;
 const splashWaitTime = 2500;
@@ -17,17 +18,14 @@ const creditsWaitTime = 2000;
 const exitGameWaitTime = 1000;
 const menuWaitTime = 300;
 const emptyCell = 0;
-const notValidChoice = -1;
-const lowestValidInputLength = 2;
 const numberTest = 1;
 const positiveNumberTest = 0;
-const swapPlayer = -1;
 const countingFromZero = 1;
 let language = DICTIONARY.en;
 
 let mainMenu = [
-    makeMenuItem(language.MENU_PVC, function () {startGame(1);}),
-    makeMenuItem(language.MENU_PVP, function () {startGame(2);}),
+    makeMenuItem(language.MENU_PVC, function () {startGame(pvc);}),
+    makeMenuItem(language.MENU_PVP, function () {startGame(pvp);}),
     makeMenuItem(language.MENU_SETTINGS, showSettings),
     makeMenuItem(language.MENU_CREDITS, showCredits),
     makeMenuItem(language.MENU_QUIT, exitGame),
@@ -140,6 +138,7 @@ function showGameSummaryDraw(){
 }
 
 function changeCurrentPlayer(){
+    const swapPlayer = -1;
     currentPlayer *= swapPlayer;
 }
 
@@ -222,13 +221,15 @@ function updateGameBoardState(move){
 
 async function getGameMoveFromCurrentPlayer(playerCount) {
     let position = null;
-    if (playerCount != pvp){
+    const playerInputOne = 0;
+    const playerInputTwo = 1;
+    if (playerCount == pvc){
         if (currentPlayer == PLAYER_1){
             do {
                 let rawInput = await askQuestion(language.PLAYER_PROMPT);
                 position = rawInput.split(" ");
-                position[0] -= countingFromZero;
-                position[1] -= countingFromZero;
+                position[playerInputOne] -= countingFromZero;
+                position[playerInputTwo] -= countingFromZero;
             } while (isValidPositionOnBoard(position) == false)
         } else {
             do {
@@ -239,8 +240,8 @@ async function getGameMoveFromCurrentPlayer(playerCount) {
         do {
             let rawInput = await askQuestion(language.PLAYER_PROMPT);
             position = rawInput.split(" ");
-            position[0] -= countingFromZero;
-            position[1] -= countingFromZero;
+            position[playerInputOne] -= countingFromZero;
+            position[playerInputTwo] -= countingFromZero;
         } while (isValidPositionOnBoard(position) == false)
     }
     
@@ -251,15 +252,16 @@ function isValidPositionOnBoard(position){
     const ROW_ID = 0;
     const COLUMN_ID = 1;
     const lowestValidOption = 0;
+    const onlyValidInputLength = 2;
 
-    if (position.length < lowestValidInputLength){
+    if (position.length != onlyValidInputLength){
         return false;
     }
 
     let isValidInput = true;
     if (position[COLUMN_ID] * numberTest != position[COLUMN_ID] && position[ROW_ID] * numberTest != position[ROW_ID]){
         isValidInput = false;
-    } else if (position[COLUMN_ID] > GAME_BOARD_SIZE || position[ROW_ID] > GAME_BOARD_SIZE){
+    } else if (position[COLUMN_ID] > GAME_BOARD_SIZE - countingFromZero || position[ROW_ID] > GAME_BOARD_SIZE - countingFromZero){
         isValidInput = false;
     } else if (position[COLUMN_ID] < lowestValidOption || position[ROW_ID] < lowestValidOption){
         isValidInput = false;
@@ -370,6 +372,7 @@ function clearScreen(){
 }
 
 async function getMenuSelection(menu){
+    const notValidChoice = -1;
     let choice = notValidChoice;
     let validChoice = false;
 
@@ -445,8 +448,8 @@ function randomNumberGenerator(){
 
 function setMenu(){
     mainMenu = [
-        makeMenuItem(language.MENU_PVC, function () {startGame(1);}),
-        makeMenuItem(language.MENU_PVP, function () {startGame(2);}),
+        makeMenuItem(language.MENU_PVC, function () {startGame(pvc);}),
+        makeMenuItem(language.MENU_PVP, function () {startGame(pvp);}),
         makeMenuItem(language.MENU_SETTINGS, showSettings),
         makeMenuItem(language.MENU_CREDITS, showCredits),
         makeMenuItem(language.MENU_QUIT, exitGame),
