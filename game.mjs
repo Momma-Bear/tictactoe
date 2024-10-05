@@ -15,7 +15,7 @@ const outcomeDraw = 2;
 const splashWaitTime = 2500;
 const creditsWaitTime = 2000;
 const exitGameWaitTime = 1000;
-const menuWaitTime = 250;
+const menuWaitTime = 300;
 const emptyCell = 0;
 const notValidChoice = -1;
 const lowestValidInputLength = 2;
@@ -25,7 +25,7 @@ const swapPlayer = -1;
 const countingFromZero = 1;
 let language = DICTIONARY.en;
 
-const MAIN_MENU = [
+let mainMenu = [
     makeMenuItem(language.MENU_PVC, function () {startGame(1);}),
     makeMenuItem(language.MENU_PVP, function () {startGame(2);}),
     makeMenuItem(language.MENU_SETTINGS, showSettings),
@@ -33,18 +33,18 @@ const MAIN_MENU = [
     makeMenuItem(language.MENU_QUIT, exitGame),
 ];
 
-const SETTINGS_MENU = [
+let settingsMenu = [
     makeMenuItem(language.SETTINGS_LANGUAGE, showLanguageSettings),
     makeMenuItem(language.MENU_BACK, showMainMenu),
-]
+];
 
-const LANGUAGE_MENU = [
+let languageMenu = [
     makeMenuItem("English", setLanguageToEnglish),
     makeMenuItem("Norsk", setLanguageToNorsk),
     makeMenuItem(language.MENU_BACK, showSettings),
-]
+];
 
-let currentMenu = MAIN_MENU;
+let currentMenu = mainMenu;
 
 let gameboard;
 let currentPlayer;
@@ -57,11 +57,12 @@ setTimeout(start, splashWaitTime);
 async function start() {
 
     do {
-    clearScreen();
-    print(ANSI.COLOR.YELLOW + "MENU" + ANSI.RESET);
-    showTheMenu(currentMenu);
-    let menuSelection = await getMenuSelection(currentMenu);
-    currentMenu[menuSelection].action();
+        inSettings = true;
+        clearScreen();
+        print(ANSI.COLOR.YELLOW + language.MENU + ANSI.RESET);
+        showMenu(currentMenu);
+        let menuSelection = await getMenuSelection(currentMenu);
+        currentMenu[menuSelection].action();
     } while (inSettings)
 
 }
@@ -387,22 +388,22 @@ function makeMenuItem(description, action){
     return {description, action}
 }
 
-function showTheMenu(menu){
+function showMenu(menu){
     for (let i = 0; i < menu.length; i++){
         print(ANSI.COLOR.BLUE + (i + countingFromZero) + ". " + ANSI.RESET + menu[i].description);
     }
 }
 
 function showSettings(){
-    currentMenu = SETTINGS_MENU;
+    currentMenu = settingsMenu;
 }
 
 function showMainMenu(){
-    currentMenu = MAIN_MENU;
+    currentMenu = mainMenu;
 }
 
 function showLanguageSettings(){
-    currentMenu = LANGUAGE_MENU;
+    currentMenu = languageMenu;
 }
 
 function showCredits(){
@@ -425,13 +426,14 @@ function quit(){
 
 function setLanguageToEnglish(){
     language = DICTIONARY.en;
-    currentMenu = SETTINGS_MENU;
-
+    setMenu();
+    currentMenu = settingsMenu;
 }
 
 function setLanguageToNorsk(){
     language = DICTIONARY.no;
-    currentMenu = SETTINGS_MENU;
+    setMenu();
+    currentMenu = settingsMenu;
 }
 
 function randomNumberGenerator(){
@@ -439,4 +441,25 @@ function randomNumberGenerator(){
     let roundedNumber = Math.ceil(randomNumber);
     
     return (roundedNumber)
+}
+
+function setMenu(){
+    mainMenu = [
+        makeMenuItem(language.MENU_PVC, function () {startGame(1);}),
+        makeMenuItem(language.MENU_PVP, function () {startGame(2);}),
+        makeMenuItem(language.MENU_SETTINGS, showSettings),
+        makeMenuItem(language.MENU_CREDITS, showCredits),
+        makeMenuItem(language.MENU_QUIT, exitGame),
+    ];
+
+    settingsMenu = [
+        makeMenuItem(language.SETTINGS_LANGUAGE, showLanguageSettings),
+        makeMenuItem(language.MENU_BACK, showMainMenu),
+    ];
+
+    languageMenu = [
+        makeMenuItem("English", setLanguageToEnglish),
+        makeMenuItem("Norsk", setLanguageToNorsk),
+        makeMenuItem(language.MENU_BACK, showSettings),
+    ];
 }

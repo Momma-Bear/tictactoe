@@ -22,6 +22,7 @@ const DICTIONARY = {
         SETTINGS_LANGUAGE: "Change language",
         MENU_BACK: "Back",
         EXIT: "Exiting game...",
+        MENU: "MENU",
 
     },
     no: {
@@ -45,6 +46,7 @@ const DICTIONARY = {
         SETTINGS_LANGUAGE: "Endre språk",
         MENU_BACK: "Tilbake",
         EXIT: "Avslutter...",
+        MENU: "MENY",
 
     }
 }
