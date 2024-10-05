@@ -22,6 +22,7 @@ const lowestValidInputLength = 2;
 const numberTest = 1;
 const positiveNumberTest = 0;
 const swapPlayer = -1;
+const countingFromZero = 1;
 let language = DICTIONARY.en;
 
 const MAIN_MENU = [
@@ -181,7 +182,7 @@ function evaluateGameState(){
     sum = gameOngoing;
 
     for (let col = 0; col < GAME_BOARD_SIZE; col++){
-        let row = GAME_BOARD_SIZE - 1 - col;
+        let row = GAME_BOARD_SIZE - countingFromZero - col;
         sum += gameboard[row][col]; 
     }
 
@@ -220,21 +221,25 @@ function updateGameBoardState(move){
 
 async function getGameMoveFromCurrentPlayer(playerCount) {
     let position = null;
-    if (playerCount == 1){
+    if (playerCount != pvp){
         if (currentPlayer == PLAYER_1){
             do {
                 let rawInput = await askQuestion(language.PLAYER_PROMPT);
                 position = rawInput.split(" ");
+                position[0] -= countingFromZero;
+                position[1] -= countingFromZero;
             } while (isValidPositionOnBoard(position) == false)
         } else {
             do {
                 position = [randomNumberGenerator(), randomNumberGenerator()];
             } while (isValidPositionOnBoard(position) == false)
         } 
-    } else if (playerCount = pvp){
+    } else if (playerCount == pvp){
         do {
             let rawInput = await askQuestion(language.PLAYER_PROMPT);
             position = rawInput.split(" ");
+            position[0] -= countingFromZero;
+            position[1] -= countingFromZero;
         } while (isValidPositionOnBoard(position) == false)
     }
     
@@ -375,7 +380,7 @@ async function getMenuSelection(menu){
             validChoice = true;
         }
     }
-    return choice - 1;
+    return choice - countingFromZero;
 }
 
 function makeMenuItem(description, action){
@@ -384,7 +389,7 @@ function makeMenuItem(description, action){
 
 function showTheMenu(menu){
     for (let i = 0; i < menu.length; i++){
-        print(ANSI.COLOR.BLUE + (i + 1) + ". " + ANSI.RESET + menu[i].description);
+        print(ANSI.COLOR.BLUE + (i + countingFromZero) + ". " + ANSI.RESET + menu[i].description);
     }
 }
 
@@ -430,8 +435,8 @@ function setLanguageToNorsk(){
 }
 
 function randomNumberGenerator(){
-    let randomNumber = Math.random() * (GAME_BOARD_SIZE - 1);
-    let roundedNumber = Math.round(randomNumber);
+    let randomNumber = Math.random() * (GAME_BOARD_SIZE - countingFromZero);
+    let roundedNumber = Math.ceil(randomNumber);
     
     return (roundedNumber)
 }
