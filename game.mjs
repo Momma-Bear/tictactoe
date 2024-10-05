@@ -3,6 +3,7 @@ import {debug, DEBUG_LEVELS} from "./debug.mjs";
 import {ANSI} from "./ansi.mjs";
 import DICTIONARY from "./language.mjs";
 import showSplashScreen from "./splash.mjs";
+import gridArt from "./grid.mjs";
 
 const GAME_BOARD_SIZE = 3;
 const numberOfCells = GAME_BOARD_SIZE * GAME_BOARD_SIZE;
@@ -309,22 +310,6 @@ function showGameBoardWithCurrentState(){
         }
     
     }
-
-    let gridArt = [ `
-        1     2     3
-     ___________________
-     |     |     |     |
-   1 | `,` | `,` | `,` |
-     |_____|_____|_____|
-     |     |     |     |
-   2 | `,` | `,` | `,` |
-     |_____|_____|_____|
-     |     |     |     |
-   3 | `,` | `,` | `,` |
-     |_____|_____|_____|
-
-   `
-   ];
 
    let completeBoard = [];
 
