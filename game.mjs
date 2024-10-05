@@ -5,6 +5,7 @@ import DICTIONARY from "./language.mjs";
 import showSplashScreen from "./splash.mjs";
 
 const GAME_BOARD_SIZE = 3;
+const numberOfCells = GAME_BOARD_SIZE * GAME_BOARD_SIZE;
 const PLAYER_1 = 1;
 const PLAYER_2 = -1;
 const player_2 = 2;
@@ -107,23 +108,33 @@ async function askWantToPlayAgain() {
     return playAgain;    
 }
 
-function showGameSummaryWin(outcome){
+function showGameSummaryWin(outcome, playerCount){
     clearScreen();
     let winningPlayer = (outcome > positiveNumberTest) ? PLAYER_1:player_2;
-    let playerDescription = language.PLAYER_1;
+    let winnerDescription = ANSI.COLOR.RED + language.PLAYER_1_WINNER;
     if (winningPlayer == player_2){
-        playerDescription = language.PLAYER_2;
+        if (playerCount == pvp){
+            winnerDescription = ANSI.COLOR.GREEN + language.PLAYER_2_WINNER;
+        } else {
+            winnerDescription = ANSI.COLOR.BLUE + language.CPU_WINNER; 
+        }
+        
     }
-    print(language.WINNER + playerDescription);
+
     showGameBoardWithCurrentState();
-    print(language.GAME_OVER);
+    print(language.WINNER + winnerDescription);
+    print("");
+    print(ANSI.COLOR.YELLOW + language.GAME_OVER + ANSI.RESET);
+    print("");
 }
 
 function showGameSummaryDraw(){
     clearScreen();
-    print(language.OUTCOME_DRAW);
     showGameBoardWithCurrentState();
-    print(language.GAME_OVER)
+    print(language.OUTCOME_DRAW);
+    print("");
+    print(ANSI.COLOR.YELLOW + language.GAME_OVER + ANSI.RESET);
+    print("");
 }
 
 function changeCurrentPlayer(){
@@ -254,38 +265,78 @@ function isValidPositionOnBoard(position){
 }
 
 function showHUD(playerCount){
-    let playerDescription = language.PLAYER_1;
+    let playerDescription = ANSI.COLOR.RED + PLAYER_1;
     if (playerCount == pvp){
         if (PLAYER_2 == currentPlayer){
-            playerDescription = language.PLAYER_2;
+            playerDescription = ANSI.COLOR.GREEN + player_2;
         }
-        print(language.PLAYER + playerDescription + language.YOUR_TURN);
+        print(language.PLAYER + playerDescription + ANSI.RESET + language.YOUR_TURN);
+        print("");
     } else {
         if (PLAYER_2 == currentPlayer){
-            print(language.CPU);
+            print(language.CPU_TURN);
+            print ("");
         } else {
-            print(language.PLAYER + playerDescription + language.YOUR_TURN);
+            print(language.PLAYER + playerDescription + ANSI.RESET + language.YOUR_TURN);
+            print("");
         }
     }
 
 }
 
 function showGameBoardWithCurrentState(){
+    let grid = [];
     for (let currentRow = 0; currentRow < GAME_BOARD_SIZE; currentRow++){
-        let rowOutput = "";
+        let fullRow = [];
         for (let currentCol = 0; currentCol < GAME_BOARD_SIZE; currentCol++){
             let cell = gameboard[currentRow][currentCol];
             if (cell == emptyCell) {
-                rowOutput += "_ ";
+                grid.push("   ");
             } else if (cell > positiveNumberTest){
-                rowOutput += "X ";
+                grid.push(" X ");
             } else {
-                rowOutput += "O ";
+                grid.push(" O ");
             }
+            
+        }
+    
+    }
+
+    let gridArt = [ `
+        1     2     3
+     ___________________
+     |     |     |     |
+   1 | `,` | `,` | `,` |
+     |_____|_____|_____|
+     |     |     |     |
+   2 | `,` | `,` | `,` |
+     |_____|_____|_____|
+     |     |     |     |
+   3 | `,` | `,` | `,` |
+     |_____|_____|_____|
+
+   `
+   ];
+
+   let completeBoard = [];
+
+   for (let i = 0; i < numberOfCells; i++){
+        completeBoard.push(gridArt[i]);
+        completeBoard.push(grid[i]);
+   }
+   completeBoard.push(gridArt[numberOfCells]);
+
+   for (let i = 0; i < completeBoard.length; i++){
+        if (completeBoard[i] == " X "){
+            process.stdout.write(`${ANSI.COLOR.RED + completeBoard[i]}`);
+        } else if (completeBoard[i] == " O "){
+            process.stdout.write(`${ANSI.COLOR.GREEN + completeBoard[i]}`);
+        } else {
+            process.stdout.write(`${ANSI.RESET + completeBoard[i]}`);
         }
 
-        print(rowOutput);
-    }
+   }
+   
 }
 
 function initilizeGame(){
@@ -333,7 +384,7 @@ function makeMenuItem(description, action){
 
 function showTheMenu(menu){
     for (let i = 0; i < menu.length; i++){
-        console.log(i + 1 + ". " + menu[i].description);
+        print(ANSI.COLOR.BLUE + (i + 1) + ". " + ANSI.RESET + menu[i].description);
     }
 }
 
