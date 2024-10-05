@@ -16,12 +16,13 @@ const gameOngoing = 0;
 const outcomeDraw = 2;
 const splashWaitTime = 2500;
 const creditsWaitTime = 2000;
-const exitGameWaitTime = 1000;
+const exitGameWaitTime = 800;
 const menuWaitTime = 300;
 const emptyCell = 0;
 const numberTest = 1;
 const positiveNumberTest = 0;
 const countingFromZero = 1;
+const onlyValidInputLength = 2;
 let language = DICTIONARY.en;
 
 let mainMenu = [
@@ -148,11 +149,9 @@ function evaluateGameState(){
     let state = gameOngoing;
 
     for (let row = 0; row < GAME_BOARD_SIZE; row ++){
-
         for (let col = 0; col < GAME_BOARD_SIZE; col++){
             sum += gameboard[row][col];
         }
-
         if (Math.abs(sum) == GAME_BOARD_SIZE){
             state = sum;
         }
@@ -160,38 +159,32 @@ function evaluateGameState(){
     }
 
     for (let col = 0; col < GAME_BOARD_SIZE; col++){
-
         for (let row = 0; row < GAME_BOARD_SIZE; row++){
             sum += gameboard[row][col];
         }
-
         if (Math.abs(sum) == GAME_BOARD_SIZE) {
             state = sum;
         }
-
         sum = gameOngoing;
     }
 
     for (let i = 0; i < GAME_BOARD_SIZE; i++){
         sum += gameboard[i][i];
     }
-
-    if (Math.abs(sum) == GAME_BOARD_SIZE){
-        state = sum;
-    }
-
-    sum = gameOngoing;
+        if (Math.abs(sum) == GAME_BOARD_SIZE){
+            state = sum;
+        }
+        sum = gameOngoing;
 
     for (let col = 0; col < GAME_BOARD_SIZE; col++){
         let row = GAME_BOARD_SIZE - countingFromZero - col;
         sum += gameboard[row][col]; 
     }
-
-    if (Math.abs(sum) == GAME_BOARD_SIZE){
-        state = sum;
-    }
-
-    sum = gameOngoing;
+        if (Math.abs(sum) == GAME_BOARD_SIZE){
+            state = sum;
+        }
+        sum = gameOngoing;
+        
     if (state != GAME_BOARD_SIZE && checkForDraw() == true){
         return outcomeDraw;
     }
@@ -234,7 +227,7 @@ async function getGameMoveFromCurrentPlayer(playerCount) {
             } while (isValidPositionOnBoard(position) == false)
         } else {
             do {
-                position = [randomNumberGenerator(), randomNumberGenerator()];
+                position = npcMove();
             } while (isValidPositionOnBoard(position) == false)
         } 
     } else if (playerCount == pvp){
@@ -253,7 +246,6 @@ function isValidPositionOnBoard(position){
     const ROW_ID = 0;
     const COLUMN_ID = 1;
     const lowestValidOption = 0;
-    const onlyValidInputLength = 2;
 
     if (position.length != onlyValidInputLength){
         return false;
@@ -424,11 +416,14 @@ function setLanguageToNorsk(){
     currentMenu = settingsMenu;
 }
 
-function randomNumberGenerator(){
-    let randomNumber = Math.random() * (GAME_BOARD_SIZE - countingFromZero);
-    let roundedNumber = Math.ceil(randomNumber);
-    
-    return (roundedNumber)
+function npcMove(){
+    let move = [];
+    for (let i = 0; i < onlyValidInputLength; i++){
+        let randomNumber = Math.random() * (GAME_BOARD_SIZE - countingFromZero);
+        let roundedNumber = Math.ceil(randomNumber);
+        move.push(roundedNumber);
+}
+    return (move)
 }
 
 function setMenu(){
